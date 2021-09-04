@@ -8,6 +8,7 @@
     <title>画板</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <canvas id="canvas" width="100" height="100"></canvas>
     <script>
@@ -56,37 +57,72 @@
         //canvas画线
         //获取屏幕宽高
         let canvas = document.getElementById("canvas");
-        canvas.width=document.documentElement.clientWidth;
-        canvas.height=document.documentElement.clientHeight;
+        canvas.width = document.documentElement.clientWidth;
+        canvas.height = document.documentElement.clientHeight;
         let ctx = canvas.getContext("2d");
 
-        let painting=false
 
 
-        ctx.fillStyle = "black";
-        ctx.strokeStyle='none'
+        let painting = false
+        let last
 
-        canvas.onmousedown=()=>{
-            painting=true
-        }
+        ctx.fillStyle = "black"
+        ctx.strokeStyle = 'none'
+        ctx.lineWidth=8
+        ctx.lineCap='round'
         
-        canvas.onmousemove=(e) => {
-            if(painting===true){
+        //画线
+        function drawLine(x1,y1,x2,y2){
             ctx.beginPath()
-            ctx.arc(e.clientX,e.clientY,10,0,2*Math.PI)
+            ctx.moveTo(x1,y1)
+            ctx.lineTo(x2,y2)
             ctx.stroke()
-            ctx.fill()
-            }else{
-                console.log('什么都不做')
-            }
-           
         }
-
-        canvas.onmouseup=()=>{
-            painting=false
-        }
-
         
+        //检测是否支持触屏
+        let isTouchDeceive = 'ontouchstart' in
+            document.documentElement;
+        console.log(isTouchDeceive)
+        if (isTouchDeceive) {
+            //判断是手机还是电脑
+            //如果是手机触摸
+            canvas.ontouchstart=(e)=>{
+                let x=e.touches[0].clientX
+                let y=e.touches[0].clientY
+                last=[x,y]
+            }
+            canvas.ontouchmove = (e) => {
+                let x = e.touches[0].clientX
+                let y = e.touches[0].clientY
+                drawLine(last[0],last[1],x,y)
+                last=[x,y]
+            }
+        } else {
+            //电脑端
+            canvas.onmousedown = (e) => {
+                painting = true
+                last=[e.clientX,e.clientY]
+            }
+
+            canvas.onmousemove = (e) => {
+                if (painting === true) {
+                    drawLine(last[0],last[1],e.clientX,e.clientY)
+                    last=[e.clientX,e.clientY]
+                } 
+
+            }
+
+            canvas.onmouseup = () => {
+                painting = false
+            }
+        }
+
+
+
+
+
+
     </script>
 </body>
+
 </html>
